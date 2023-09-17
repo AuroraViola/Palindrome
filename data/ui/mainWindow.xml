@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="AdwWindow" id="window">
+    <property name="width-request">360</property>
+    <property name="height-request">360</property>
+    <property name="content">
+      <object class="GtkBox">
+        <property name="orientation">1</property>
+        <child>
+          <object class="AdwHeaderBar">
+            <property name="centering-policy">1</property>
+            <property name="title-widget">
+              <object class="AdwViewSwitcherTitle" id="switcher_title">
+                <property name="stack">stack</property>
+                <property name="title" translatable="true">Palindrome</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwViewStack" id="stack">
+            <property name="vexpand">true</property>
+            <child>
+              <object class="AdwViewStackPage" id="page1">
+                <property name="name">page1</property>
+                <property name="title" translatable="true">Now Playing</property>
+                <property name="icon-name">folder-music-symbolic</property>
+                <property name="use-underline">true</property>
+                <property name="child">
+                  <object class="AdwStatusPage">
+                    <property name="title" bind-source="page1" bind-property="title" bind-flags="sync-create"/>
+                    <property name="icon-name" bind-source="page1" bind-property="icon-name" bind-flags="sync-create"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwViewStackPage" id="page2">
+                <property name="name">page2</property>
+                <property name="title" translatable="true">Artists</property>
+                <property name="icon-name">avatar-default-symbolic</property>
+                <property name="use-underline">true</property>
+                <property name="child">
+                  <object class="AdwStatusPage">
+                    <property name="title" bind-source="page2" bind-property="title" bind-flags="sync-create"/>
+                    <property name="icon-name" bind-source="page2" bind-property="icon-name" bind-flags="sync-create"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwViewStackPage" id="page3">
+                <property name="name">page3</property>
+                <property name="title" translatable="true">Albums</property>
+                <property name="icon-name">media-optical-symbolic</property>
+                <property name="use-underline">true</property>
+                <property name="child">
+                  <object class="AdwStatusPage">
+                    <property name="title" bind-source="page3" bind-property="title" bind-flags="sync-create"/>
+                    <property name="valign">1</property>
+                    <property name="margin-start">15</property>
+                    <property name="margin-end">15</property>
+                    <property name="child">
+                      <object class="AdwClamp">
+                        <property name="maximum-size">500</property>
+                        <child>
+                          <object class="GtkListBox" id="albums_list">
+                            <property name="halign">4</property>
+                            <style>
+                              <class name="boxed-list"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="AdwViewStackPage" id="page4">
+                <property name="name">page4</property>
+                <property name="title" translatable="true">Playlists</property>
+                <property name="icon-name">focus-legacy-systray-symbolic</property>
+                <property name="use-underline">true</property>
+                <property name="child">
+                  <object class="AdwStatusPage">
+                    <property name="title" bind-source="page4" bind-property="title" bind-flags="sync-create"/>
+                    <property name="icon-name" bind-source="page4" bind-property="icon-name" bind-flags="sync-create"/>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwViewSwitcherBar" id="switcher_bar">
+            <property name="stack">stack</property>
+            <property name="reveal" bind-source="switcher_title" bind-property="title-visible" bind-flags="sync-create"/>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>

@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "palindrome"
+version = "0.1.0"
+description = ""
+authors = ["Aurora"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+mpv = "^1.0.4"
+xmltodict = "^0.13.0"
+requests = "^2.31.0"
+pygobject = "^3.46.0"
+glib = "^1.0.0"
+adw = "^0.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

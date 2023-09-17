@@ -37,7 +37,22 @@
                 <property name="child">
                   <object class="AdwStatusPage">
                     <property name="title" bind-source="page1" bind-property="title" bind-flags="sync-create"/>
-                    <property name="icon-name" bind-source="page1" bind-property="icon-name" bind-flags="sync-create"/>
+                    <property name="valign">1</property>
+                    <property name="margin-start">15</property>
+                    <property name="margin-end">15</property>
+                    <property name="child">
+                      <object class="AdwClamp">
+                        <property name="maximum-size">500</property>
+                        <child>
+                          <object class="GtkListBox" id="nowPlaying_list">
+                            <property name="halign">4</property>
+                            <style>
+                              <class name="boxed-list"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
                   </object>
                 </property>
               </object>
@@ -132,19 +147,74 @@
           </object>
         </child>
         <child>
-          <object class="GtkBox" id="playbar">
-            <property name="orientation">1</property>
+          <object class="GtkBox">
+            <property name="orientation">0</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
             <child>
               <object class="GtkBox">
-                <property name="orientation">0</property>
+                <property name="orientation">1</property>
+                <property name="width-request">300</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="label">Song name</property>
+                    <property name="halign">1</property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkLabel">
                     <property name="label">Artist name</property>
+                    <property name="halign">1</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Album name</property>
+                    <property name="halign">1</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">0</property>
+                <property name="halign">3</property>
+                <child>
+                  <object class="GtkButton" id="prevBtn">
+                    <property name="icon-name">media-skip-backward-symbolic</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="playBtn">
+                    <property name="icon-name">media-playback-start-symbolic</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="nextBtn">
+                    <property name="icon-name">media-skip-forward-symbolic</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="stopBtn">
+                    <property name="icon-name">media-playback-stop-symbolic</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>
                   </object>
                 </child>
               </object>

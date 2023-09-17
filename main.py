@@ -9,25 +9,6 @@ gi.require_version('Adw', '1')
 gi.require_version("Gtk", "4.0")
 from gi.repository import Adw, Gtk, GLib
 
-class player():
-    import mpv
-    player = mpv.MPV(ytdl=True)
-
-    def __init__(self):
-        pass
-
-    def pause(self):
-        self.player.pause = True
-
-    def unpause(self):
-        self.player.pause = False
-
-    def togglePause(self):
-        self.player.pause = not self.player.pause
-
-    def setVolume(self, volume : int):
-        self.player.volume = volume
-
 class SubsonicAPI():
     def __init__(self):
         with open("/home/aurora/.config/Palindrome/config.json", "r") as f:
@@ -69,17 +50,124 @@ class SubsonicAPI():
         else:
             return [playlists]
 
+    def getSong(self, songId):
+        par2 = self.par.copy()
+        par2["id"] = songId
+        return xmltodict.parse(requests.get(self.url + "getSong", params=par2).content)["subsonic-response"]["song"]
+
+class Player():
+    import mpv
+    player = mpv.MPV(ytdl=True)
+    queue = []
+    queueSelector = 0
+    isPlaying = False
+
+    def __init__(self):
+        pass
+
+    def play(self, url):
+        self.isPlaying = True
+        self.player.play(url)
+
+    def stop(self):
+        self.isPlaying = False
+        self.player.stop()
+
+    def isPaused(self):
+        return self.player.pause
+
+    def pause(self):
+        self.player.pause = True
+
+    def unpause(self):
+        self.player.pause = False
+
+    def togglePause(self):
+        self.player.pause = not self.player.pause
+
+    def setVolume(self, volume : int):
+        self.player.volume = volume
+
+
 class Palindrome(Adw.Application):
-    player = player()
+    player = Player()
     api = SubsonicAPI()
+    mainWindow = Gtk.Builder.new_from_file("data/ui/mainWindow.xml")
 
     def __init__(self):
         super().__init__(application_id="org.auroraviola.palindrome")
         GLib.set_application_name("Palindrome")
 
+    def updateNowPlaying(self):
+        while True:
+            try:
+                self.mainWindow.get_object("nowPlaying_list").remove(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(0))
+            except:
+                break
+
+        for song in self.player.queue:
+            thing = Adw.ActionRow().new()
+            songinfo = self.api.getSong(song)
+            thing.props.title = str(songinfo["@title"])
+            thing.props.subtitle = str(songinfo["@artist"])
+
+            self.mainWindow.get_object("nowPlaying_list").append(thing)
+
+    def updateSelected(self):
+        self.mainWindow.get_object("nowPlaying_list").unselect_all()
+        self.mainWindow.get_object("nowPlaying_list").select_row(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(self.player.queueSelector))
+
+    def addAlbumToQueue(self, button, albumId):
+        par2 = self.api.par.copy()
+        par2["id"] = albumId
+        songlist = xmltodict.parse(requests.get(self.api.url + "getAlbum", params=par2).content)["subsonic-response"]["album"]["song"]
+        try:
+            for song in songlist:
+                self.player.queue.append(song["@id"])
+        except:
+            self.player.queue.append(songlist["@id"])
+
+        self.updateNowPlaying()
+
+    def getPlayUrl(self):
+        par2 = self.api.par.copy()
+        par2["id"] = self.player.queue[self.player.queueSelector]
+        return self.api.url + "download?" + urllib.parse.urlencode(par2)
+
+    def playBtnPressed(self, button):
+        if len(self.player.queue) > 0:
+            if not self.player.isPlaying:
+                button.props.icon_name = "media-playback-pause-symbolic"
+                self.player.play(self.getPlayUrl())
+                self.player.unpause()
+                self.updateSelected()
+            else:
+                if button.props.icon_name == "media-playback-start-symbolic":
+                    button.props.icon_name = "media-playback-pause-symbolic"
+                    self.player.unpause()
+                else:
+                    button.props.icon_name = "media-playback-start-symbolic"
+                    self.player.pause()
+
+    def stopBtnPressed(self, button, playBtn):
+        self.player.stop()
+        self.mainWindow.get_object("nowPlaying_list").unselect_all()
+        playBtn.props.icon_name = "media-playback-start-symbolic"
+
+    def prevBtnPressed(self, button):
+        if self.player.queueSelector > 0:
+            self.player.queueSelector -= 1
+            self.player.play(self.getPlayUrl())
+            self.updateSelected()
+
+    def nextBtnPressed(self, button):
+        if self.player.queueSelector < len(self.player.queue)-1:
+            self.player.queueSelector += 1
+            self.player.play(self.getPlayUrl())
+            self.updateSelected()
+
     def do_activate(self):
         window = Adw.ApplicationWindow(application=self, title="Palindrome")
-        mainWindow = Gtk.Builder.new_from_file("data/ui/mainWindow.xml")
 
         for artist in self.api.getArtistsList():
             thing = Adw.ActionRow().new()
@@ -89,14 +177,20 @@ class Palindrome(Adw.Application):
             else:
                 thing.props.subtitle = str(artist["@albumCount"]) + " Album"
 
-            mainWindow.get_object("artists_list").append(thing)
+            self.mainWindow.get_object("artists_list").append(thing)
 
         for album in self.api.getAlbumsList():
             thing = Adw.ActionRow().new()
             thing.props.title = str(album["@title"]).replace("&", "&amp;")
             thing.props.subtitle = str(album["@artist"]).replace("&", "&amp;")
 
-            mainWindow.get_object("albums_list").append(thing)
+            addQueueBtn = Gtk.Button().new()
+            addQueueBtn.props.icon_name = "list-add-symbolic"
+            addQueueBtn.connect("clicked", self.addAlbumToQueue, album["@id"])
+
+            thing.add_suffix(addQueueBtn)
+
+            self.mainWindow.get_object("albums_list").append(thing)
 
         for playlist in self.api.getPlaylistsList():
             thing = Adw.ActionRow().new()
@@ -106,9 +200,14 @@ class Palindrome(Adw.Application):
             else:
                 thing.props.subtitle = str(playlist["@songCount"]) + " Song"
 
-            mainWindow.get_object("playlists_list").append(thing)
+            self.mainWindow.get_object("playlists_list").append(thing)
 
-        window = mainWindow.get_object("window")
+        self.mainWindow.get_object("playBtn").connect("clicked", self.playBtnPressed)
+        self.mainWindow.get_object("stopBtn").connect("clicked", self.stopBtnPressed, self.mainWindow.get_object("playBtn"))
+        self.mainWindow.get_object("prevBtn").connect("clicked", self.prevBtnPressed)
+        self.mainWindow.get_object("nextBtn").connect("clicked", self.nextBtnPressed)
+
+        window = self.mainWindow.get_object("window")
         window.present()
 
 app = Palindrome()

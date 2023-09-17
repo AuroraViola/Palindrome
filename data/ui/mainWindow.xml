@@ -2,8 +2,8 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <object class="AdwWindow" id="window">
-    <property name="width-request">360</property>
-    <property name="height-request">360</property>
+    <property name="width-request">750</property>
+    <property name="height-request">550</property>
     <property name="content">
       <object class="GtkBox">
         <property name="orientation">1</property>
@@ -16,6 +16,13 @@
                 <property name="title" translatable="true">Palindrome</property>
               </object>
             </property>
+            <child type="end">
+              <object class="GtkMenuButton" id="button_menu">
+                <property name="menu-model">menu_app</property>
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="primary">true</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>
@@ -44,7 +51,22 @@
                 <property name="child">
                   <object class="AdwStatusPage">
                     <property name="title" bind-source="page2" bind-property="title" bind-flags="sync-create"/>
-                    <property name="icon-name" bind-source="page2" bind-property="icon-name" bind-flags="sync-create"/>
+                    <property name="valign">1</property>
+                    <property name="margin-start">15</property>
+                    <property name="margin-end">15</property>
+                    <property name="child">
+                      <object class="AdwClamp">
+                        <property name="maximum-size">500</property>
+                        <child>
+                          <object class="GtkListBox" id="artists_list">
+                            <property name="halign">4</property>
+                            <style>
+                              <class name="boxed-list"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
                   </object>
                 </property>
               </object>
@@ -87,7 +109,22 @@
                 <property name="child">
                   <object class="AdwStatusPage">
                     <property name="title" bind-source="page4" bind-property="title" bind-flags="sync-create"/>
-                    <property name="icon-name" bind-source="page4" bind-property="icon-name" bind-flags="sync-create"/>
+                    <property name="valign">1</property>
+                    <property name="margin-start">15</property>
+                    <property name="margin-end">15</property>
+                    <property name="child">
+                      <object class="AdwClamp">
+                        <property name="maximum-size">500</property>
+                        <child>
+                          <object class="GtkListBox" id="playlists_list">
+                            <property name="halign">4</property>
+                            <style>
+                              <class name="boxed-list"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
                   </object>
                 </property>
               </object>
@@ -95,12 +132,38 @@
           </object>
         </child>
         <child>
-          <object class="AdwViewSwitcherBar" id="switcher_bar">
-            <property name="stack">stack</property>
-            <property name="reveal" bind-source="switcher_title" bind-property="title-visible" bind-flags="sync-create"/>
+          <object class="GtkBox" id="playbar">
+            <property name="orientation">1</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">0</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Song name</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label">Artist name</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
         </child>
       </object>
     </property>
   </object>
+  <menu id="menu_app">
+    <section>
+      <item>
+        <attribute name="label" translatable="true">Settings</attribute>
+        <attribute name="action">app.settings</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="true">About Palindrome</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+  </menu>
 </interface>

@@ -117,6 +117,18 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("nowPlaying_list").unselect_all()
         self.mainWindow.get_object("nowPlaying_list").select_row(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(self.player.queueSelector))
 
+    def addPlaylistToQueue(self, button, playlistId):
+        par2 = self.api.par.copy()
+        par2["id"] = playlistId
+        songlist = xmltodict.parse(requests.get(self.api.url + "getPlaylist", params=par2).content)["subsonic-response"]["playlist"]["entry"]
+        try:
+            for song in songlist:
+                self.player.queue.append(song["@id"])
+        except:
+            self.player.queue.append(songlist["@id"])
+
+        self.updateNowPlaying()
+
     def addAlbumToQueue(self, button, albumId):
         par2 = self.api.par.copy()
         par2["id"] = albumId
@@ -199,6 +211,12 @@ class Palindrome(Adw.Application):
                 thing.props.subtitle = str(playlist["@songCount"]) + " Songs"
             else:
                 thing.props.subtitle = str(playlist["@songCount"]) + " Song"
+
+            addQueueBtn = Gtk.Button().new()
+            addQueueBtn.props.icon_name = "list-add-symbolic"
+            addQueueBtn.connect("clicked", self.addPlaylistToQueue, playlist["@id"])
+
+            thing.add_suffix(addQueueBtn)
 
             self.mainWindow.get_object("playlists_list").append(thing)
 

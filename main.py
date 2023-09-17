@@ -20,7 +20,7 @@ class player():
         self.player.pause = True
 
     def unpause(self):
-        self.player.pause = True
+        self.player.pause = False
 
     def togglePause(self):
         self.player.pause = not self.player.pause

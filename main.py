@@ -31,7 +31,7 @@ class SubsonicAPI():
     def getSalt(self):
         return ''.join((random.choice(string.ascii_letters + string.digits) for i in range(10)))
 
-    def getArtistsList(self):
+    def getArtists(self):
         par2 = self.par.copy()
         indexes = xmltodict.parse(requests.get(self.url + "getArtists", params=par2).content)["subsonic-response"]["artists"]["index"]
         finalList = []
@@ -52,7 +52,7 @@ class SubsonicAPI():
         else:
             return [albums]
 
-    def getPlaylistsList(self):
+    def getPlaylists(self):
         par2 = self.par.copy()
         playlists = xmltodict.parse(requests.get(self.url + "getPlaylists", params=par2).content)["subsonic-response"]["playlists"]["playlist"]
         if isinstance(playlists, list):
@@ -64,6 +64,16 @@ class SubsonicAPI():
         par2 = self.par.copy()
         par2["id"] = songId
         return xmltodict.parse(requests.get(self.url + "getSong", params=par2).content)["subsonic-response"]["song"]
+
+    def getAlbum(self, albumId):
+        par2 = self.par.copy()
+        par2["id"] = albumId
+        return xmltodict.parse(requests.get(self.url + "getAlbum", params=par2).content)["subsonic-response"]["album"]["song"]
+
+    def getPlaylist(self, playlistId):
+        par2 = self.par.copy()
+        par2["id"] = playlistId
+        return xmltodict.parse(requests.get(self.url + "getPlaylist", params=par2).content)["subsonic-response"]["playlist"]["entry"]
 
 class Player():
     import mpv
@@ -98,7 +108,6 @@ class Player():
     def setVolume(self, volume : int):
         self.player.volume = volume
 
-
 class Palindrome(Adw.Application):
     player = Player()
     api = SubsonicAPI()
@@ -132,9 +141,7 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("nowPlaying_list").select_row(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(self.player.queueSelector))
 
     def addPlaylistToQueue(self, button, playlistId):
-        par2 = self.api.par.copy()
-        par2["id"] = playlistId
-        songlist = xmltodict.parse(requests.get(self.api.url + "getPlaylist", params=par2).content)["subsonic-response"]["playlist"]["entry"]
+        songlist = self.api.getPlaylist(playlistId)
         if isinstance(songlist, list):
             for song in songlist:
                 self.player.queue.append(song)
@@ -145,9 +152,7 @@ class Palindrome(Adw.Application):
         self.updateSelected()
 
     def addAlbumToQueue(self, button, albumId):
-        par2 = self.api.par.copy()
-        par2["id"] = albumId
-        songlist = xmltodict.parse(requests.get(self.api.url + "getAlbum", params=par2).content)["subsonic-response"]["album"]["song"]
+        songlist = self.api.getAlbum(albumId)
         if isinstance(songlist, list):
             for song in songlist:
                 self.player.queue.append(song)
@@ -200,10 +205,13 @@ class Palindrome(Adw.Application):
             self.updateSelected()
             self.updateSongInfo()
 
+    def setVolume(self, slider):
+        self.player.setVolume(int(slider.get_value()))
+
     def do_activate(self):
         window = Adw.ApplicationWindow(application=self, title="Palindrome")
 
-        for artist in self.api.getArtistsList():
+        for artist in self.api.getArtists():
             thing = Adw.ActionRow().new()
             thing.props.title = str(artist["@name"]).replace("&", "&amp;")
             if artist["@albumCount"] != "1":
@@ -223,12 +231,11 @@ class Palindrome(Adw.Application):
             addQueueBtn.connect("clicked", self.addAlbumToQueue, album["@id"])
             addQueueBtn.props.margin_top = 10
             addQueueBtn.props.margin_bottom = 10
-
             thing.add_suffix(addQueueBtn)
 
             self.mainWindow.get_object("albums_list").append(thing)
 
-        for playlist in self.api.getPlaylistsList():
+        for playlist in self.api.getPlaylists():
             thing = Adw.ActionRow().new()
             thing.props.title = str(playlist["@name"]).replace("&", "&amp;")
             if playlist["@songCount"] != "1":
@@ -241,7 +248,6 @@ class Palindrome(Adw.Application):
             addQueueBtn.connect("clicked", self.addPlaylistToQueue, playlist["@id"])
             addQueueBtn.props.margin_top = 10
             addQueueBtn.props.margin_bottom = 10
-
             thing.add_suffix(addQueueBtn)
 
             self.mainWindow.get_object("playlists_list").append(thing)
@@ -250,6 +256,8 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("stopBtn").connect("clicked", self.stopBtnPressed, self.mainWindow.get_object("playBtn"))
         self.mainWindow.get_object("prevBtn").connect("clicked", self.prevBtnPressed)
         self.mainWindow.get_object("nextBtn").connect("clicked", self.nextBtnPressed)
+
+        self.mainWindow.get_object("volumeChanger").connect("value-changed", self.setVolume)
 
         window = self.mainWindow.get_object("window")
         window.present()

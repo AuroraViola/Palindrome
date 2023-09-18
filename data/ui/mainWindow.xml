@@ -2,8 +2,8 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <object class="AdwWindow" id="window">
-    <property name="width-request">750</property>
-    <property name="height-request">550</property>
+    <property name="width-request">800</property>
+    <property name="height-request">600</property>
     <property name="content">
       <object class="GtkBox">
         <property name="orientation">1</property>
@@ -152,6 +152,7 @@
         </child>
         <child>
           <object class="GtkBox">
+            <property name="height-request">80</property>
             <property name="orientation">0</property>
             <property name="margin-start">10</property>
             <property name="margin-end">10</property>
@@ -159,24 +160,30 @@
             <property name="margin-bottom">10</property>
             <child>
               <object class="GtkBox">
-                <property name="orientation">1</property>
+                <property name="orientation">0</property>
                 <property name="width-request">300</property>
+                <property name="valign">3</property>
                 <child>
-                  <object class="GtkLabel" id="songName">
-                    <property name="label">-</property>
-                    <property name="halign">1</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="artistName">
-                    <property name="label">-</property>
-                    <property name="halign">1</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="albumName">
-                    <property name="label">-</property>
-                    <property name="halign">1</property>
+                  <object class="GtkBox">
+                    <property name="orientation">1</property>
+                    <child>
+                      <object class="GtkLabel" id="songName">
+                        <property name="label">-</property>
+                        <property name="halign">1</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="artistName">
+                        <property name="label">-</property>
+                        <property name="halign">1</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="albumName">
+                        <property name="label">-</property>
+                        <property name="halign">1</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -185,6 +192,17 @@
               <object class="GtkBox">
                 <property name="orientation">0</property>
                 <property name="halign">3</property>
+                <property name="valign">3</property>
+                <property name="hexpand">1</property>
+                <child>
+                  <object class="GtkToggleButton" id="FavouriteBtn">
+                    <property name="icon-name">emblem-favorite-symbolic</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>
+                  </object>
+                </child>
                 <child>
                   <object class="GtkButton" id="prevBtn">
                     <property name="icon-name">media-skip-backward-symbolic</property>
@@ -219,6 +237,56 @@
                     <property name="margin-end">5</property>
                     <property name="margin-top">10</property>
                     <property name="margin-bottom">10</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">1</property>
+                <property name="width-request">300</property>
+                <property name="valign">3</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">0</property>
+                    <property name="halign">2</property>
+                    <child>
+                      <object class="GtkToggleButton" id="loopBtn">
+                        <property name="icon-name">media-playlist-repeat-song-symbolic</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="shuffleBtn">
+                        <property name="icon-name">media-playlist-shuffle-symbolic</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">0</property>
+                    <property name="halign">2</property>
+                    <child>
+                      <object class="GtkImage" >
+                        <property name="icon-name">multimedia-volume-control-symbolic</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkScale" id="volumeChanger">
+                        <property name="width-request">150</property>
+                        <property name="adjustment">
+                          <object class="GtkAdjustment">
+                            <property name="lower">0</property>
+                            <property name="upper">100</property>
+                            <property name="value">100</property>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>

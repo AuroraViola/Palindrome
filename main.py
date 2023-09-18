@@ -98,6 +98,11 @@ class Palindrome(Adw.Application):
         super().__init__(application_id="org.auroraviola.palindrome")
         GLib.set_application_name("Palindrome")
 
+    def updateSongInfo(self):
+        self.mainWindow.get_object("songName").set_label(self.player.queue[self.player.queueSelector]["@title"])
+        self.mainWindow.get_object("artistName").set_label(self.player.queue[self.player.queueSelector]["@artist"])
+        self.mainWindow.get_object("albumName").set_label(self.player.queue[self.player.queueSelector]["@album"])
+
     def updateNowPlaying(self):
         while True:
             try:
@@ -127,6 +132,7 @@ class Palindrome(Adw.Application):
             self.player.queue.append(songlist)
 
         self.updateNowPlaying()
+        self.updateSelected()
 
     def addAlbumToQueue(self, button, albumId):
         par2 = self.api.par.copy()
@@ -139,6 +145,7 @@ class Palindrome(Adw.Application):
             self.player.queue.append(songlist)
 
         self.updateNowPlaying()
+        self.updateSelected()
 
     def getPlayUrl(self):
         par2 = self.api.par.copy()
@@ -152,6 +159,7 @@ class Palindrome(Adw.Application):
                 self.player.play(self.getPlayUrl())
                 self.player.unpause()
                 self.updateSelected()
+                self.updateSongInfo()
             else:
                 if button.props.icon_name == "media-playback-start-symbolic":
                     button.props.icon_name = "media-playback-pause-symbolic"
@@ -164,18 +172,23 @@ class Palindrome(Adw.Application):
         self.player.stop()
         self.mainWindow.get_object("nowPlaying_list").unselect_all()
         playBtn.props.icon_name = "media-playback-start-symbolic"
+        self.mainWindow.get_object("songName").set_label("-")
+        self.mainWindow.get_object("artistName").set_label("-")
+        self.mainWindow.get_object("albumName").set_label("-")
 
     def prevBtnPressed(self, button):
         if self.player.queueSelector > 0:
             self.player.queueSelector -= 1
             self.player.play(self.getPlayUrl())
             self.updateSelected()
+            self.updateSongInfo()
 
     def nextBtnPressed(self, button):
         if self.player.queueSelector < len(self.player.queue)-1:
             self.player.queueSelector += 1
             self.player.play(self.getPlayUrl())
             self.updateSelected()
+            self.updateSongInfo()
 
     def do_activate(self):
         window = Adw.ApplicationWindow(application=self, title="Palindrome")
@@ -198,6 +211,8 @@ class Palindrome(Adw.Application):
             addQueueBtn = Gtk.Button().new()
             addQueueBtn.props.icon_name = "list-add-symbolic"
             addQueueBtn.connect("clicked", self.addAlbumToQueue, album["@id"])
+            addQueueBtn.props.margin_top = 10
+            addQueueBtn.props.margin_bottom = 10
 
             thing.add_suffix(addQueueBtn)
 
@@ -214,6 +229,8 @@ class Palindrome(Adw.Application):
             addQueueBtn = Gtk.Button().new()
             addQueueBtn.props.icon_name = "list-add-symbolic"
             addQueueBtn.connect("clicked", self.addPlaylistToQueue, playlist["@id"])
+            addQueueBtn.props.margin_top = 10
+            addQueueBtn.props.margin_bottom = 10
 
             thing.add_suffix(addQueueBtn)
 

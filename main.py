@@ -107,9 +107,8 @@ class Palindrome(Adw.Application):
 
         for song in self.player.queue:
             thing = Adw.ActionRow().new()
-            songinfo = self.api.getSong(song)
-            thing.props.title = str(songinfo["@title"])
-            thing.props.subtitle = str(songinfo["@artist"])
+            thing.props.title = str(song["@title"]).replace("&", "&amp;")
+            thing.props.subtitle = str(song["@artist"]).replace("&", "&amp;")
 
             self.mainWindow.get_object("nowPlaying_list").append(thing)
 
@@ -121,11 +120,11 @@ class Palindrome(Adw.Application):
         par2 = self.api.par.copy()
         par2["id"] = playlistId
         songlist = xmltodict.parse(requests.get(self.api.url + "getPlaylist", params=par2).content)["subsonic-response"]["playlist"]["entry"]
-        try:
+        if isinstance(songlist, list):
             for song in songlist:
-                self.player.queue.append(song["@id"])
-        except:
-            self.player.queue.append(songlist["@id"])
+                self.player.queue.append(song)
+        elif isinstance(songlist, dict):
+            self.player.queue.append(songlist)
 
         self.updateNowPlaying()
 
@@ -133,17 +132,17 @@ class Palindrome(Adw.Application):
         par2 = self.api.par.copy()
         par2["id"] = albumId
         songlist = xmltodict.parse(requests.get(self.api.url + "getAlbum", params=par2).content)["subsonic-response"]["album"]["song"]
-        try:
+        if isinstance(songlist, list):
             for song in songlist:
-                self.player.queue.append(song["@id"])
-        except:
-            self.player.queue.append(songlist["@id"])
+                self.player.queue.append(song)
+        elif isinstance(songlist, dict):
+            self.player.queue.append(songlist)
 
         self.updateNowPlaying()
 
     def getPlayUrl(self):
         par2 = self.api.par.copy()
-        par2["id"] = self.player.queue[self.player.queueSelector]
+        par2["id"] = self.player.queue[self.player.queueSelector]["@id"]
         return self.api.url + "download?" + urllib.parse.urlencode(par2)
 
     def playBtnPressed(self, button):

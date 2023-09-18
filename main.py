@@ -1,5 +1,9 @@
+import random
+import string
 import sys
 import json
+import hashlib
+
 import xmltodict
 import requests
 import gi
@@ -13,13 +17,19 @@ class SubsonicAPI():
     def __init__(self):
         with open("/home/aurora/.config/Palindrome/config.json", "r") as f:
             info = json.load(f)
+            salt = self.getSalt()
+            token = (hashlib.md5(str(info["auth"]["password"]+salt).encode())).hexdigest()
             self.url = "https://" + info["hostname"] + "/rest/"
             self.par = {
                 "u": info["auth"]["username"],
-                "p": info["auth"]["password"],
+                "t": token,
+                "s": salt,
                 "v": "1.16.1",
                 "c": "Palindrome"
             }
+
+    def getSalt(self):
+        return ''.join((random.choice(string.ascii_letters + string.digits) for i in range(10)))
 
     def getArtistsList(self):
         par2 = self.par.copy()

@@ -158,20 +158,20 @@
                 <property name="orientation">1</property>
                 <property name="width-request">300</property>
                 <child>
-                  <object class="GtkLabel">
-                    <property name="label">Song name</property>
+                  <object class="GtkLabel" id="songName">
+                    <property name="label">-</property>
                     <property name="halign">1</property>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkLabel">
-                    <property name="label">Artist name</property>
+                  <object class="GtkLabel" id="artistName">
+                    <property name="label">-</property>
                     <property name="halign">1</property>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkLabel">
-                    <property name="label">Album name</property>
+                  <object class="GtkLabel" id="albumName">
+                    <property name="label">-</property>
                     <property name="halign">1</property>
                   </object>
                 </child>

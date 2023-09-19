@@ -44,11 +44,30 @@
                       <object class="AdwClamp">
                         <property name="maximum-size">500</property>
                         <child>
-                          <object class="GtkListBox" id="nowPlaying_list">
-                            <property name="halign">4</property>
-                            <style>
-                              <class name="boxed-list"/>
-                            </style>
+                          <object class="GtkBox">
+                            <property name="orientation">1</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="orientation">0</property>
+                                <property name="halign">1</property>
+                                <child>
+                                  <object class="GtkButton" id="emptyQueueBtn">
+                                    <property name="icon-name">app-remove-symbolic</property>
+                                    <style>
+                                      <class name="destructive-action"/>
+                                    </style>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkListBox" id="nowPlaying_list">
+                                <property name="halign">4</property>
+                                <style>
+                                  <class name="boxed-list"/>
+                                </style>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -201,6 +220,10 @@
                     <property name="margin-end">5</property>
                     <property name="margin-top">10</property>
                     <property name="margin-bottom">10</property>
+                    <style>
+                      <class name="flat"/>
+                      <class name="circular"/>
+                    </style>
                   </object>
                 </child>
                 <child>
@@ -210,6 +233,10 @@
                     <property name="margin-end">5</property>
                     <property name="margin-top">10</property>
                     <property name="margin-bottom">10</property>
+                    <style>
+                      <class name="flat"/>
+                      <class name="circular"/>
+                    </style>
                   </object>
                 </child>
                 <child>
@@ -219,6 +246,10 @@
                     <property name="margin-end">5</property>
                     <property name="margin-top">10</property>
                     <property name="margin-bottom">10</property>
+                    <style>
+                      <class name="suggested-action"/>
+                      <class name="circular"/>
+                    </style>
                   </object>
                 </child>
                 <child>
@@ -228,6 +259,10 @@
                     <property name="margin-end">5</property>
                     <property name="margin-top">10</property>
                     <property name="margin-bottom">10</property>
+                    <style>
+                      <class name="flat"/>
+                      <class name="circular"/>
+                    </style>
                   </object>
                 </child>
                 <child>
@@ -237,6 +272,10 @@
                     <property name="margin-end">5</property>
                     <property name="margin-top">10</property>
                     <property name="margin-bottom">10</property>
+                    <style>
+                      <class name="flat"/>
+                      <class name="circular"/>
+                    </style>
                   </object>
                 </child>
               </object>
@@ -255,6 +294,10 @@
                         <property name="icon-name">media-playlist-repeat-song-symbolic</property>
                         <property name="margin-start">5</property>
                         <property name="margin-end">5</property>
+                        <style>
+                          <class name="flat"/>
+                          <class name="circular"/>
+                        </style>
                       </object>
                     </child>
                     <child>
@@ -262,6 +305,10 @@
                         <property name="icon-name">media-playlist-shuffle-symbolic</property>
                         <property name="margin-start">5</property>
                         <property name="margin-end">5</property>
+                        <style>
+                          <class name="flat"/>
+                          <class name="circular"/>
+                        </style>
                       </object>
                     </child>
                   </object>

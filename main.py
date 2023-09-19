@@ -75,6 +75,7 @@ class SubsonicAPI():
         par2["id"] = playlistId
         return xmltodict.parse(requests.get(self.url + "getPlaylist", params=par2).content)["subsonic-response"]["playlist"]["entry"]
 
+
 class Player():
     import mpv
     player = mpv.MPV(ytdl=True)
@@ -108,6 +109,14 @@ class Player():
     def setVolume(self, volume : int):
         self.player.volume = volume
 
+    def loop(self, loopStatus):
+        if loopStatus:
+            self.player.loop_file = "inf"
+        else:
+            self.player.loop_file = "0"
+
+
+
 class Palindrome(Adw.Application):
     player = Player()
     api = SubsonicAPI()
@@ -117,10 +126,16 @@ class Palindrome(Adw.Application):
         super().__init__(application_id="org.auroraviola.palindrome")
         GLib.set_application_name("Palindrome")
 
+    def formatTextForSongInfo(self, string):
+        if len(string) > 30:
+            return string[:28] + "..."
+
+        return string
+
     def updateSongInfo(self):
-        self.mainWindow.get_object("songName").set_label(self.player.queue[self.player.queueSelector]["@title"])
-        self.mainWindow.get_object("artistName").set_label(self.player.queue[self.player.queueSelector]["@artist"])
-        self.mainWindow.get_object("albumName").set_label(self.player.queue[self.player.queueSelector]["@album"])
+        self.mainWindow.get_object("songName").set_label(self.formatTextForSongInfo(self.player.queue[self.player.queueSelector]["@title"]))
+        self.mainWindow.get_object("artistName").set_label(self.formatTextForSongInfo(self.player.queue[self.player.queueSelector]["@artist"]))
+        self.mainWindow.get_object("albumName").set_label(self.formatTextForSongInfo(self.player.queue[self.player.queueSelector]["@album"]))
 
     def updateNowPlaying(self):
         while True:
@@ -151,8 +166,8 @@ class Palindrome(Adw.Application):
         self.updateNowPlaying()
         self.updateSelected()
 
-    def addAlbumToQueue(self, button, albumId):
-        songlist = self.api.getAlbum(albumId)
+    def addAlbumToQueue(self, button, album_id):
+        songlist = self.api.getAlbum(album_id)
         if isinstance(songlist, list):
             for song in songlist:
                 self.player.queue.append(song)
@@ -204,6 +219,21 @@ class Palindrome(Adw.Application):
             self.player.play(self.getPlayUrl())
             self.updateSelected()
             self.updateSongInfo()
+
+    def emptyQueueBtnPressed(self, button):
+        self.player.queue = []
+        self.player.queueSelector = 0
+        while True:
+            try:
+                self.mainWindow.get_object("nowPlaying_list").remove(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(0))
+            except:
+                break
+
+    def loopBtnPressed(self, button, idk):
+        if button.props.active:
+            self.player.loop(True)
+        else:
+            self.player.loop(False)
 
     def setVolume(self, slider):
         self.player.setVolume(int(slider.get_value()))
@@ -257,6 +287,9 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("prevBtn").connect("clicked", self.prevBtnPressed)
         self.mainWindow.get_object("nextBtn").connect("clicked", self.nextBtnPressed)
 
+        self.mainWindow.get_object("emptyQueueBtn").connect("clicked", self.emptyQueueBtnPressed)
+
+        self.mainWindow.get_object("loopBtn").connect("notify::active", self.loopBtnPressed)
         self.mainWindow.get_object("volumeChanger").connect("value-changed", self.setVolume)
 
         window = self.mainWindow.get_object("window")

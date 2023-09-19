@@ -75,6 +75,16 @@ class SubsonicAPI():
         par2["id"] = playlistId
         return xmltodict.parse(requests.get(self.url + "getPlaylist", params=par2).content)["subsonic-response"]["playlist"]["entry"]
 
+    def starSong(self, songId):
+        par2 = self.par.copy()
+        par2["id"] = songId
+        requests.get(self.url + "star", params=par2)
+
+    def unstarSong(self, songId):
+        par2 = self.par.copy()
+        par2["id"] = songId
+        requests.get(self.url + "unstar", params=par2)
+
 
 class Player():
     import mpv
@@ -136,6 +146,11 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("songName").set_label(self.formatTextForSongInfo(self.player.queue[self.player.queueSelector]["@title"]))
         self.mainWindow.get_object("artistName").set_label(self.formatTextForSongInfo(self.player.queue[self.player.queueSelector]["@artist"]))
         self.mainWindow.get_object("albumName").set_label(self.formatTextForSongInfo(self.player.queue[self.player.queueSelector]["@album"]))
+
+        if "@starred" in self.player.queue[self.player.queueSelector]:
+            self.mainWindow.get_object("FavouriteBtn").props.active = True
+        else:
+            self.mainWindow.get_object("FavouriteBtn").props.active = False
 
     def updateNowPlaying(self):
         while True:
@@ -205,6 +220,7 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("songName").set_label("-")
         self.mainWindow.get_object("artistName").set_label("-")
         self.mainWindow.get_object("albumName").set_label("-")
+        self.mainWindow.get_object("FavouriteBtn").props.active = False
 
     def prevBtnPressed(self, button):
         if self.player.queueSelector > 0:
@@ -220,6 +236,19 @@ class Palindrome(Adw.Application):
             self.updateSelected()
             self.updateSongInfo()
 
+    def favouriteBtnPressed(self, button):
+        if self.player.isPlaying:
+            if button.props.active:
+                self.api.starSong(self.player.queue[self.player.queueSelector]["@id"])
+                self.player.queue[self.player.queueSelector]["@starred"] = "placeholder"
+            else:
+                self.api.unstarSong(self.player.queue[self.player.queueSelector]["@id"])
+                if "@starred" in self.player.queue[self.player.queueSelector]:
+                    del self.player.queue[self.player.queueSelector]["@starred"]
+        else:
+            self.mainWindow.get_object("FavouriteBtn").props.active = False
+
+
     def emptyQueueBtnPressed(self, button):
         self.player.queue = []
         self.player.queueSelector = 0
@@ -229,7 +258,7 @@ class Palindrome(Adw.Application):
             except:
                 break
 
-    def loopBtnPressed(self, button, idk):
+    def loopBtnPressed(self, button):
         if button.props.active:
             self.player.loop(True)
         else:
@@ -286,10 +315,11 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("stopBtn").connect("clicked", self.stopBtnPressed, self.mainWindow.get_object("playBtn"))
         self.mainWindow.get_object("prevBtn").connect("clicked", self.prevBtnPressed)
         self.mainWindow.get_object("nextBtn").connect("clicked", self.nextBtnPressed)
+        self.mainWindow.get_object("FavouriteBtn").connect("clicked", self.favouriteBtnPressed)
 
         self.mainWindow.get_object("emptyQueueBtn").connect("clicked", self.emptyQueueBtnPressed)
 
-        self.mainWindow.get_object("loopBtn").connect("notify::active", self.loopBtnPressed)
+        self.mainWindow.get_object("loopBtn").connect("clicked", self.loopBtnPressed)
         self.mainWindow.get_object("volumeChanger").connect("value-changed", self.setVolume)
 
         window = self.mainWindow.get_object("window")

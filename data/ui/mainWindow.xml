@@ -185,6 +185,18 @@
                 <child>
                   <object class="GtkBox">
                     <property name="orientation">1</property>
+                    <property name="width-request">80</property>
+                    <child>
+                      <object class="GtkPicture" id="coverArt">
+                        <property name="content-fit">2</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">1</property>
+                    <property name="margin-start">10</property>
                     <child>
                       <object class="GtkLabel" id="songName">
                         <property name="label">-</property>

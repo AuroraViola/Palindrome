@@ -11,7 +11,7 @@ import urllib.parse
 
 gi.require_version('Adw', '1')
 gi.require_version("Gtk", "4.0")
-from gi.repository import Adw, Gtk, GLib
+from gi.repository import Adw, Gtk, GLib, Gdk, GdkPixbuf, Gio
 
 class SubsonicAPI():
     def __init__(self):
@@ -85,6 +85,11 @@ class SubsonicAPI():
         par2["id"] = songId
         requests.get(self.url + "unstar", params=par2)
 
+    def getCoverArt(self, songId):
+        par2 = self.par.copy()
+        par2["id"] = songId
+        return requests.get(self.url + "getCoverArt", params=par2).content
+
 
 class Player():
     import mpv
@@ -125,6 +130,8 @@ class Player():
         else:
             self.player.loop_file = "0"
 
+    def getCurrentSong(self):
+        return self.queue[self.queueSelector]
 
 
 class Palindrome(Adw.Application):
@@ -143,11 +150,15 @@ class Palindrome(Adw.Application):
         return string
 
     def updateSongInfo(self):
-        self.mainWindow.get_object("songName").set_label(self.formatTextForSongInfo(self.player.queue[self.player.queueSelector]["@title"]))
-        self.mainWindow.get_object("artistName").set_label(self.formatTextForSongInfo(self.player.queue[self.player.queueSelector]["@artist"]))
-        self.mainWindow.get_object("albumName").set_label(self.formatTextForSongInfo(self.player.queue[self.player.queueSelector]["@album"]))
+        currentSong = self.player.getCurrentSong()
+        self.mainWindow.get_object("songName").set_label(self.formatTextForSongInfo(currentSong["@title"]))
+        self.mainWindow.get_object("artistName").set_label(self.formatTextForSongInfo(currentSong["@artist"]))
+        self.mainWindow.get_object("albumName").set_label(self.formatTextForSongInfo(currentSong["@album"]))
 
-        if "@starred" in self.player.queue[self.player.queueSelector]:
+        image = Gdk.Texture.new_from_bytes(GLib.Bytes.new(self.api.getCoverArt(self.player.getCurrentSong()["@id"])))
+        self.mainWindow.get_object("coverArt").set_paintable(image)
+
+        if "@starred" in currentSong:
             self.mainWindow.get_object("FavouriteBtn").props.active = True
         else:
             self.mainWindow.get_object("FavouriteBtn").props.active = False
@@ -194,7 +205,7 @@ class Palindrome(Adw.Application):
 
     def getPlayUrl(self):
         par2 = self.api.par.copy()
-        par2["id"] = self.player.queue[self.player.queueSelector]["@id"]
+        par2["id"] = self.player.getCurrentSong()["@id"]
         return self.api.url + "download?" + urllib.parse.urlencode(par2)
 
     def playBtnPressed(self, button):
@@ -221,6 +232,7 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("artistName").set_label("-")
         self.mainWindow.get_object("albumName").set_label("-")
         self.mainWindow.get_object("FavouriteBtn").props.active = False
+        self.mainWindow.get_object("coverArt").set_paintable()
 
     def prevBtnPressed(self, button):
         if self.player.queueSelector > 0:
@@ -239,10 +251,10 @@ class Palindrome(Adw.Application):
     def favouriteBtnPressed(self, button):
         if self.player.isPlaying:
             if button.props.active:
-                self.api.starSong(self.player.queue[self.player.queueSelector]["@id"])
+                self.api.starSong(self.player.getCurrentSong()["@id"])
                 self.player.queue[self.player.queueSelector]["@starred"] = "placeholder"
             else:
-                self.api.unstarSong(self.player.queue[self.player.queueSelector]["@id"])
+                self.api.unstarSong(self.player.getCurrentSong()["@id"])
                 if "@starred" in self.player.queue[self.player.queueSelector]:
                     del self.player.queue[self.player.queueSelector]["@starred"]
         else:
@@ -323,7 +335,9 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("volumeChanger").connect("value-changed", self.setVolume)
 
         window = self.mainWindow.get_object("window")
+
         window.present()
+
 
 app = Palindrome()
 exit_status = app.run(sys.argv)

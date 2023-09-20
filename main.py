@@ -90,6 +90,12 @@ class SubsonicAPI():
         par2["id"] = songId
         return requests.get(self.url + "getCoverArt", params=par2).content
 
+    def scrobble(self, songId, submission):
+        par2 = self.par.copy()
+        par2["id"] = songId
+        par2["submission"] = submission
+        requests.get(self.url + "scrobble", params=par2)
+
 
 class Player():
     import mpv
@@ -205,7 +211,7 @@ class Palindrome(Adw.Application):
     def getPlayUrl(self):
         par2 = self.api.par.copy()
         par2["id"] = self.player.getCurrentSong()["@id"]
-        return self.api.url + "download?" + urllib.parse.urlencode(par2)
+        return self.api.url + "stream?" + urllib.parse.urlencode(par2)
 
     def playBtnPressed(self, button):
         if len(self.player.queue) > 0:
@@ -268,6 +274,7 @@ class Palindrome(Adw.Application):
 
     def finishedProgressBar(self, bar):
         bar.reset()
+        self.api.scrobble(self.player.getCurrentSong()["@id"], "True")
         if (self.player.queueSelector < len(self.player.queue)-1) or (self.mainWindow.get_object("loopBtn").props.active):
             if not self.mainWindow.get_object("loopBtn").props.active:
                 self.player.queueSelector += 1

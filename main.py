@@ -11,7 +11,7 @@ import urllib.parse
 
 gi.require_version('Adw', '1')
 gi.require_version("Gtk", "4.0")
-from gi.repository import Adw, Gtk, GLib, Gdk, GdkPixbuf, Gio
+from gi.repository import Adw, Gtk, GLib, Gdk
 
 class SubsonicAPI():
     def __init__(self):
@@ -124,11 +124,8 @@ class Player():
     def setVolume(self, volume : int):
         self.player.volume = volume
 
-    def loop(self, loopStatus):
-        if loopStatus:
-            self.player.loop_file = "inf"
-        else:
-            self.player.loop_file = "0"
+    def isPaused(self):
+        return self.player.pause
 
     def getCurrentSong(self):
         return self.queue[self.queueSelector]
@@ -138,10 +135,12 @@ class Palindrome(Adw.Application):
     player = Player()
     api = SubsonicAPI()
     mainWindow = Gtk.Builder.new_from_file("data/ui/mainWindow.xml")
+    progressBarAnimation = Adw.TimedAnimation.new(mainWindow.get_object("progressBar"), 0, 1, 5000, Adw.PropertyAnimationTarget.new(mainWindow.get_object("progressBar"), "fraction"))
 
     def __init__(self):
         super().__init__(application_id="org.auroraviola.palindrome")
         GLib.set_application_name("Palindrome")
+        self.progressBarAnimation.set_easing(0)
 
     def formatTextForSongInfo(self, string):
         if len(string) > 30:
@@ -213,6 +212,8 @@ class Palindrome(Adw.Application):
             if not self.player.isPlaying:
                 button.props.icon_name = "media-playback-pause-symbolic"
                 self.player.play(self.getPlayUrl())
+                self.progressBarAnimation.set_duration(int(self.player.getCurrentSong()["@duration"])*1000+1000)
+                self.progressBarAnimation.play()
                 self.player.unpause()
                 self.updateSelected()
                 self.updateSongInfo()
@@ -220,12 +221,15 @@ class Palindrome(Adw.Application):
                 if button.props.icon_name == "media-playback-start-symbolic":
                     button.props.icon_name = "media-playback-pause-symbolic"
                     self.player.unpause()
+                    self.progressBarAnimation.resume()
                 else:
                     button.props.icon_name = "media-playback-start-symbolic"
                     self.player.pause()
+                    self.progressBarAnimation.pause()
 
     def stopBtnPressed(self, button, playBtn):
         self.player.stop()
+        self.progressBarAnimation.reset()
         self.mainWindow.get_object("nowPlaying_list").unselect_all()
         playBtn.props.icon_name = "media-playback-start-symbolic"
         self.mainWindow.get_object("songName").set_label("-")
@@ -237,6 +241,13 @@ class Palindrome(Adw.Application):
     def prevBtnPressed(self, button):
         if self.player.queueSelector > 0:
             self.player.queueSelector -= 1
+            self.progressBarAnimation.reset()
+            self.progressBarAnimation.set_duration(int(self.player.getCurrentSong()["@duration"]) * 1000 + 1000)
+            self.progressBarAnimation.play()
+            self.player.unpause()
+            playBtn = self.mainWindow.get_object("playBtn")
+            if playBtn.props.icon_name == "media-playback-start-symbolic":
+                playBtn.props.icon_name = "media-playback-pause-symbolic"
             self.player.play(self.getPlayUrl())
             self.updateSelected()
             self.updateSongInfo()
@@ -244,9 +255,30 @@ class Palindrome(Adw.Application):
     def nextBtnPressed(self, button):
         if self.player.queueSelector < len(self.player.queue)-1:
             self.player.queueSelector += 1
+            self.progressBarAnimation.reset()
+            self.progressBarAnimation.set_duration(int(self.player.getCurrentSong()["@duration"]) * 1000 + 1000)
+            self.progressBarAnimation.play()
+            self.player.unpause()
+            playBtn = self.mainWindow.get_object("playBtn")
+            if playBtn.props.icon_name == "media-playback-start-symbolic":
+                playBtn.props.icon_name = "media-playback-pause-symbolic"
             self.player.play(self.getPlayUrl())
             self.updateSelected()
             self.updateSongInfo()
+
+    def finishedProgressBar(self, bar):
+        bar.reset()
+        if (self.player.queueSelector < len(self.player.queue)-1) or (self.mainWindow.get_object("loopBtn").props.active):
+            if not self.mainWindow.get_object("loopBtn").props.active:
+                self.player.queueSelector += 1
+                self.player.play(self.getPlayUrl())
+                bar.set_duration(int(self.player.getCurrentSong()["@duration"])*1000+1000)
+                bar.play()
+                self.updateSelected()
+                self.updateSongInfo()
+            else:
+                self.player.play(self.getPlayUrl())
+                bar.play()
 
     def favouriteBtnPressed(self, button):
         if self.player.isPlaying:
@@ -269,12 +301,6 @@ class Palindrome(Adw.Application):
                 self.mainWindow.get_object("nowPlaying_list").remove(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(0))
             except:
                 break
-
-    def loopBtnPressed(self, button):
-        if button.props.active:
-            self.player.loop(True)
-        else:
-            self.player.loop(False)
 
     def setVolume(self, slider):
         self.player.setVolume(int(slider.get_value()))
@@ -323,6 +349,8 @@ class Palindrome(Adw.Application):
 
             self.mainWindow.get_object("playlists_list").append(thing)
 
+        self.progressBarAnimation.connect("done", self.finishedProgressBar)
+
         self.mainWindow.get_object("playBtn").connect("clicked", self.playBtnPressed)
         self.mainWindow.get_object("stopBtn").connect("clicked", self.stopBtnPressed, self.mainWindow.get_object("playBtn"))
         self.mainWindow.get_object("prevBtn").connect("clicked", self.prevBtnPressed)
@@ -331,7 +359,6 @@ class Palindrome(Adw.Application):
 
         self.mainWindow.get_object("emptyQueueBtn").connect("clicked", self.emptyQueueBtnPressed)
 
-        self.mainWindow.get_object("loopBtn").connect("clicked", self.loopBtnPressed)
         self.mainWindow.get_object("volumeChanger").connect("value-changed", self.setVolume)
 
         window = self.mainWindow.get_object("window")

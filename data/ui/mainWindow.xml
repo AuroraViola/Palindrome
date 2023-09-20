@@ -166,7 +166,8 @@
           </object>
         </child>
         <child>
-          <object class="GtkSeparator">
+          <object class="GtkProgressBar" id="progressBar">
+            <property name="fraction">0</property>
           </object>
         </child>
         <child>
@@ -252,6 +253,19 @@
                   </object>
                 </child>
                 <child>
+                  <object class="GtkButton" id="seekBackward">
+                    <property name="icon-name">media-seek-backward-symbolic</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>
+                    <style>
+                      <class name="flat"/>
+                      <class name="circular"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
                   <object class="GtkButton" id="playBtn">
                     <property name="icon-name">media-playback-start-symbolic</property>
                     <property name="margin-start">5</property>
@@ -260,6 +274,19 @@
                     <property name="margin-bottom">10</property>
                     <style>
                       <class name="suggested-action"/>
+                      <class name="circular"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="seekForward">
+                    <property name="icon-name">media-seek-forward-symbolic</property>
+                    <property name="margin-start">5</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>
+                    <style>
+                      <class name="flat"/>
                       <class name="circular"/>
                     </style>
                   </object>

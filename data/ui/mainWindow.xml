@@ -367,8 +367,8 @@
                         <property name="adjustment">
                           <object class="GtkAdjustment">
                             <property name="lower">0</property>
-                            <property name="upper">100</property>
-                            <property name="value">100</property>
+                            <property name="upper">1</property>
+                            <property name="value">1</property>
                           </object>
                         </property>
                       </object>

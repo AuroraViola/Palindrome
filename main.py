@@ -303,7 +303,7 @@ class Palindrome(Adw.Application):
                 break
 
     def setVolume(self, slider):
-        self.player.setVolume(int(slider.get_value()))
+        self.player.setVolume(int((slider.get_value()**0.5)*100))
 
     def do_activate(self):
         window = Adw.ApplicationWindow(application=self, title="Palindrome")

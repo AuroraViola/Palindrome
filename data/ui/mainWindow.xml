@@ -42,7 +42,7 @@
                     <property name="margin-end">15</property>
                     <property name="child">
                       <object class="AdwClamp">
-                        <property name="maximum-size">500</property>
+                        <property name="maximum-size">700</property>
                         <child>
                           <object class="GtkBox">
                             <property name="orientation">1</property>
@@ -90,7 +90,7 @@
                     <property name="margin-end">15</property>
                     <property name="child">
                       <object class="AdwClamp">
-                        <property name="maximum-size">500</property>
+                        <property name="maximum-size">700</property>
                         <child>
                           <object class="GtkListBox" id="artists_list">
                             <property name="halign">4</property>
@@ -119,7 +119,7 @@
                     <property name="margin-end">15</property>
                     <property name="child">
                       <object class="AdwClamp">
-                        <property name="maximum-size">500</property>
+                        <property name="maximum-size">700</property>
                         <child>
                           <object class="GtkListBox" id="albums_list">
                             <property name="halign">4</property>
@@ -148,7 +148,7 @@
                     <property name="margin-end">15</property>
                     <property name="child">
                       <object class="AdwClamp">
-                        <property name="maximum-size">500</property>
+                        <property name="maximum-size">700</property>
                         <child>
                           <object class="GtkListBox" id="playlists_list">
                             <property name="halign">4</property>

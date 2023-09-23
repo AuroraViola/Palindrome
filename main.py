@@ -233,49 +233,65 @@ class Palindrome(Adw.Application):
 
     def do_activate(self):
         # This create the Artist list
-        for artist in self.api.getArtists():
-            thing = Adw.ActionRow().new()
-            thing.props.title = str(artist["@name"]).replace("&", "&amp;")
-            if artist["@albumCount"] != "1":
-                thing.props.subtitle = str(artist["@albumCount"]) + " Albums"
-            else:
-                thing.props.subtitle = str(artist["@albumCount"]) + " Album"
+        if self.api.getArtists() != []:
+            for artist in self.api.getArtists():
+                thing = Adw.ActionRow().new()
+                thing.props.title = str(artist["@name"]).replace("&", "&amp;")
+                if artist["@albumCount"] != "1":
+                    thing.props.subtitle = str(artist["@albumCount"]) + " Albums"
+                else:
+                    thing.props.subtitle = str(artist["@albumCount"]) + " Album"
 
+                self.mainWindow.get_object("artists_list").append(thing)
+        else:
+            thing = Adw.ActionRow().new()
+            thing.props.title = "Error while fetching artists"
             self.mainWindow.get_object("artists_list").append(thing)
 
+
         # This create the Album list
-        for album in self.api.getAlbumsList():
+        if self.api.getAlbumsList() != []:
+            for album in self.api.getAlbumsList():
+                thing = Adw.ActionRow().new()
+                thing.props.title = str(album["@title"]).replace("&", "&amp;")
+                thing.props.subtitle = str(album["@artist"]).replace("&", "&amp;")
+
+                # This add a button at the end of the ActionRow
+                addQueueBtn = Gtk.Button().new()
+                addQueueBtn.props.icon_name = "list-add-symbolic"
+                addQueueBtn.connect("clicked", self.addAlbumToQueue, album["@id"])
+                addQueueBtn.props.margin_top = 10
+                addQueueBtn.props.margin_bottom = 10
+                thing.add_suffix(addQueueBtn)
+
+                self.mainWindow.get_object("albums_list").append(thing)
+        else:
             thing = Adw.ActionRow().new()
-            thing.props.title = str(album["@title"]).replace("&", "&amp;")
-            thing.props.subtitle = str(album["@artist"]).replace("&", "&amp;")
-
-            # This add a button at the end of the ActionRow
-            addQueueBtn = Gtk.Button().new()
-            addQueueBtn.props.icon_name = "list-add-symbolic"
-            addQueueBtn.connect("clicked", self.addAlbumToQueue, album["@id"])
-            addQueueBtn.props.margin_top = 10
-            addQueueBtn.props.margin_bottom = 10
-            thing.add_suffix(addQueueBtn)
-
+            thing.props.title = "Error while fetching albums"
             self.mainWindow.get_object("albums_list").append(thing)
 
         # This create the playlist list
-        for playlist in self.api.getPlaylists():
+        if self.api.getPlaylists() != []:
+            for playlist in self.api.getPlaylists():
+                thing = Adw.ActionRow().new()
+                thing.props.title = str(playlist["@name"]).replace("&", "&amp;")
+                if playlist["@songCount"] != "1":
+                    thing.props.subtitle = str(playlist["@songCount"]) + " Songs"
+                else:
+                    thing.props.subtitle = str(playlist["@songCount"]) + " Song"
+
+                # This add a button at the end of the ActionRow
+                addQueueBtn = Gtk.Button().new()
+                addQueueBtn.props.icon_name = "list-add-symbolic"
+                addQueueBtn.connect("clicked", self.addPlaylistToQueue, playlist["@id"])
+                addQueueBtn.props.margin_top = 10
+                addQueueBtn.props.margin_bottom = 10
+                thing.add_suffix(addQueueBtn)
+
+                self.mainWindow.get_object("playlists_list").append(thing)
+        else:
             thing = Adw.ActionRow().new()
-            thing.props.title = str(playlist["@name"]).replace("&", "&amp;")
-            if playlist["@songCount"] != "1":
-                thing.props.subtitle = str(playlist["@songCount"]) + " Songs"
-            else:
-                thing.props.subtitle = str(playlist["@songCount"]) + " Song"
-
-            # This add a button at the end of the ActionRow
-            addQueueBtn = Gtk.Button().new()
-            addQueueBtn.props.icon_name = "list-add-symbolic"
-            addQueueBtn.connect("clicked", self.addPlaylistToQueue, playlist["@id"])
-            addQueueBtn.props.margin_top = 10
-            addQueueBtn.props.margin_bottom = 10
-            thing.add_suffix(addQueueBtn)
-
+            thing.props.title = "Error while fetching playlists"
             self.mainWindow.get_object("playlists_list").append(thing)
 
         # Assign the function to buttons and similar thing

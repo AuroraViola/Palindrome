@@ -8,17 +8,19 @@ import os
 
 class API():
     def __init__(self):
+        #if not os.path.exists((os.path.expanduser("~") + "/.config/Palindrome/auth.json")):
+            #os.mkdir((os.path.expanduser("~") + "/.config/Palindrome/auth.json"))
         # It opens the config file. THIS NEED TO BE REWORKED
-        with open((os.path.expanduser("~") + "/.config/Palindrome/config.json"), "r") as f:
+        with open((os.path.expanduser("~") + "/.config/Palindrome/auth.json"), "r") as f:
             info = json.load(f)
 
             # create the salt and token
             salt = self.getSalt()
-            token = (hashlib.md5(str(info["auth"]["password"]+salt).encode())).hexdigest()
+            token = (hashlib.md5(str(info["password"]+salt).encode())).hexdigest()
 
-            self.url = "https://" + info["hostname"] + "/rest/"
+            self.url = info["hostname"] + "/rest/"
             self.par = {
-                "u": info["auth"]["username"],
+                "u": info["username"],
                 "t": token,
                 "s": salt,
                 "v": "1.16.1",
@@ -28,6 +30,30 @@ class API():
     def getSalt(self):
         # Returns a random string of 10 chars. This will be the salt
         return ''.join((random.choice(string.ascii_letters + string.digits) for i in range(10)))
+
+    def updatePar(self, host, username, password):
+        self.url = host + "/rest/"
+        salt = self.getSalt()
+        token = (hashlib.md5(str(password + salt).encode())).hexdigest()
+        self.par = {
+            "u": username,
+            "t": token,
+            "s": salt,
+            "v": "1.16.1",
+            "c": "Palindrome"
+        }
+
+    def ping(self):
+        try:
+            request = xmltodict.parse(requests.get(self.url + "ping", params=self.par).content)["subsonic-response"]
+            if request["@status"] == "ok":
+                return "ok"
+            elif request["error"]["@code"] == "10" or request["error"]["@code"] == "40":
+                return "Wrong username or password"
+            else:
+                return "generic error"
+        except:
+            return "Invalid URL"
 
     def getArtists(self):
         # Return a list of all artists (an artist is a dict)

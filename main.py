@@ -21,7 +21,7 @@ class Palindrome(Adw.Application):
         GLib.set_application_name("Palindrome")
         self.progressBarAnimation.set_easing(0)
 
-    def openAboutWindow(self, button):
+    def openAboutWindow(self):
         dialog = Adw.AboutWindow().new()
         dialog.props.transient_for = self.mainWindow.get_object("window")
         dialog.props.application_icon = "application-x-executable"
@@ -35,6 +35,27 @@ class Palindrome(Adw.Application):
         dialog.props.developers = ["Aurora Arcidiacono https://github.com/AuroraViola"]
         dialog.props.artists = ["Aurora Arcidiacono https://github.com/AuroraViola"]
         dialog.present()
+
+    def loginBtnPressed(self, button, host, username, password, errorLabel):
+        self.api.updatePar(host.props.text, username.props.text, password.props.text)
+        errorLabel.props.label = self.api.ping()
+        if errorLabel.props.label == "ok":
+            self.createArtistsList()
+            self.createAlbumList()
+            self.createPlaylistsList()
+            self.emptyQueueBtnPressed(button="None")
+
+    def openLoginWindow(self, button):
+        loginWindow = Gtk.Builder.new_from_file("data/ui/loginWindow.xml")
+        window = loginWindow.get_object("loginWindow")
+        host = loginWindow.get_object("url")
+        username = loginWindow.get_object("username")
+        password = loginWindow.get_object("password")
+        errorLabel = loginWindow.get_object("error")
+        window.props.title = "Login"
+        window.props.transient_for = self.mainWindow.get_object("window")
+        loginWindow.get_object("loginBtn").connect("clicked", self.loginBtnPressed, host, username, password, errorLabel)
+        window.present()
 
     def formatTextForSongInfo(self, string):
         # This is used to short a string that is too long. It's used in updateSongInfo()
@@ -246,8 +267,13 @@ class Palindrome(Adw.Application):
         # This function set volume using a sqrt scale
         self.player.setVolume(int((slider.get_value()**0.5)*100))
 
-    def do_activate(self):
+    def createArtistsList(self):
         # This create the Artist list
+        while True:
+            try:
+                self.mainWindow.get_object("artists_list").remove(self.mainWindow.get_object("artists_list").get_row_at_index(0))
+            except:
+                break
         if self.api.getArtists() != []:
             for artist in self.api.getArtists():
                 thing = Adw.ActionRow().new()
@@ -263,8 +289,13 @@ class Palindrome(Adw.Application):
             thing.props.title = "Error while fetching artists"
             self.mainWindow.get_object("artists_list").append(thing)
 
-
+    def createAlbumList(self):
         # This create the Album list
+        while True:
+            try:
+                self.mainWindow.get_object("albums_list").remove(self.mainWindow.get_object("albums_list").get_row_at_index(0))
+            except:
+                break
         if self.api.getAlbumsList() != []:
             for album in self.api.getAlbumsList():
                 thing = Adw.ActionRow().new()
@@ -285,7 +316,13 @@ class Palindrome(Adw.Application):
             thing.props.title = "Error while fetching albums"
             self.mainWindow.get_object("albums_list").append(thing)
 
+    def createPlaylistsList(self):
         # This create the playlist list
+        while True:
+            try:
+                self.mainWindow.get_object("playlists_list").remove(self.mainWindow.get_object("playlists_list").get_row_at_index(0))
+            except:
+                break
         if self.api.getPlaylists() != []:
             for playlist in self.api.getPlaylists():
                 thing = Adw.ActionRow().new()
@@ -309,6 +346,11 @@ class Palindrome(Adw.Application):
             thing.props.title = "Error while fetching playlists"
             self.mainWindow.get_object("playlists_list").append(thing)
 
+    def do_activate(self):
+        self.createArtistsList()
+        self.createAlbumList()
+        self.createPlaylistsList()
+
         # Assign the function to buttons and similar thing
         self.progressBarAnimation.connect("done", self.finishedProgressBar)
 
@@ -322,12 +364,18 @@ class Palindrome(Adw.Application):
 
         self.mainWindow.get_object("volumeChanger").connect("value-changed", self.setVolume)
 
+        self.mainWindow.get_object("loginBtn").connect("clicked", self.openLoginWindow)
+
+
         # Creates the window itself
         window = self.mainWindow.get_object("window")
         window.set_title("Palindrome")
         window.set_application(self)
 
         window.present()
+
+        if self.api.ping() != "ok":
+            self.openLoginWindow(button=None)
 
 
 app = Palindrome()

@@ -16,6 +16,11 @@
                 <property name="title" translatable="true">Palindrome</property>
               </object>
             </property>
+            <child type="start">
+              <object class="GtkButton" id="loginBtn">
+                <property name="label">login</property>
+              </object>
+            </child>
             <child type="end">
               <object class="GtkMenuButton" id="button_menu">
                 <property name="menu-model">menu_app</property>

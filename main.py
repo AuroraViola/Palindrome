@@ -44,6 +44,7 @@ class Palindrome(Adw.Application):
         else:
             self.mainWindow.get_object("FavouriteBtn").props.active = False
 
+        # This update the selected song in the nowPlaying_list
         self.mainWindow.get_object("nowPlaying_list").unselect_all()
         self.mainWindow.get_object("nowPlaying_list").select_row(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(self.player.queueSelector))
 

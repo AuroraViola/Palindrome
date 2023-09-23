@@ -4,11 +4,12 @@ import random
 import string
 import requests
 import xmltodict
+import os
 
 class API():
     def __init__(self):
         # It opens the config file. THIS NEED TO BE REWORKED
-        with open("/home/aurora/.config/Palindrome/config.json", "r") as f:
+        with open((os.path.expanduser("~") + "/.config/Palindrome/config.json"), "r") as f:
             info = json.load(f)
 
             # create the salt and token
@@ -31,34 +32,43 @@ class API():
     def getArtists(self):
         # Return a list of all artists (an artist is a dict)
         par2 = self.par.copy()
-        indexes = xmltodict.parse(requests.get(self.url + "getArtists", params=par2).content)["subsonic-response"]["artists"]["index"]
-        finalList = []
-        for index in indexes:
-            if isinstance(index["artist"], list):
-                finalList.extend(index["artist"])
-            elif isinstance(index["artist"], dict):
-                finalList.append(index["artist"])
-        return finalList
+        try:
+            indexes = xmltodict.parse(requests.get(self.url + "getArtists", params=par2).content)["subsonic-response"]["artists"]["index"]
+            finalList = []
+            for index in indexes:
+                if isinstance(index["artist"], list):
+                    finalList.extend(index["artist"])
+                elif isinstance(index["artist"], dict):
+                    finalList.append(index["artist"])
+            return finalList
+        except:
+            return []
 
     def getAlbumsList(self):
         # Return a list of all albums (an album is a dict)
         par2 = self.par.copy()
         par2['type'] = "alphabeticalByArtist"
         par2["size"] = 0
-        albums = xmltodict.parse(requests.get(self.url + "getAlbumList", params=par2).content)["subsonic-response"]["albumList"]["album"]
-        if isinstance(albums, list):
-            return albums
-        else:
-            return [albums]
+        try:
+            albums = xmltodict.parse(requests.get(self.url + "getAlbumList", params=par2).content)["subsonic-response"]["albumList"]["album"]
+            if isinstance(albums, list):
+                return albums
+            else:
+                return [albums]
+        except:
+            return []
 
     def getPlaylists(self):
         # Return a list of all playlist (a playlist is a dict)
         par2 = self.par.copy()
-        playlists = xmltodict.parse(requests.get(self.url + "getPlaylists", params=par2).content)["subsonic-response"]["playlists"]["playlist"]
-        if isinstance(playlists, list):
-            return playlists
-        else:
-            return [playlists]
+        try:
+            playlists = xmltodict.parse(requests.get(self.url + "getPlaylists", params=par2).content)["subsonic-response"]["playlists"]["playlist"]
+            if isinstance(playlists, list):
+                return playlists
+            else:
+                return [playlists]
+        except:
+            return []
 
     def getSong(self, songId):
         # Return information (as a dict) about the specified song

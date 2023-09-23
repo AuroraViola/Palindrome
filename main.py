@@ -21,6 +21,21 @@ class Palindrome(Adw.Application):
         GLib.set_application_name("Palindrome")
         self.progressBarAnimation.set_easing(0)
 
+    def openAboutWindow(self, button):
+        dialog = Adw.AboutWindow().new()
+        dialog.props.transient_for = self.mainWindow.get_object("window")
+        dialog.props.application_icon = "application-x-executable"
+        dialog.props.application_name = "Palindrome"
+        dialog.props.developer_name = "Aurora Arcidiacono"
+        dialog.props.version = "0.1.0"
+        dialog.props.website = "https://github.com/AuroraViola/Palindrome"
+        dialog.props.issue_url = "https://github.com/AuroraViola/Palindrome/issues/new"
+        dialog.props.copyright = "© 2023 Aurora Arcidiacono"
+        dialog.props.license_type = Gtk.License.AGPL_3_0_ONLY
+        dialog.props.developers = ["Aurora Arcidiacono https://github.com/AuroraViola"]
+        dialog.props.artists = ["Aurora Arcidiacono https://github.com/AuroraViola"]
+        dialog.present()
+
     def formatTextForSongInfo(self, string):
         # This is used to short a string that is too long. It's used in updateSongInfo()
         if len(string) > 30:

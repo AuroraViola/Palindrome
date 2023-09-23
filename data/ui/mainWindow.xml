@@ -390,7 +390,6 @@
       </item>
       <item>
         <attribute name="label" translatable="true">About Palindrome</attribute>
-        <attribute name="action">app.about</attribute>
       </item>
     </section>
   </menu>

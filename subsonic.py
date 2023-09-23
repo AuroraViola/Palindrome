@@ -8,10 +8,23 @@ import os
 
 class API():
     def __init__(self):
-        #if not os.path.exists((os.path.expanduser("~") + "/.config/Palindrome/auth.json")):
-            #os.mkdir((os.path.expanduser("~") + "/.config/Palindrome/auth.json"))
-        # It opens the config file. THIS NEED TO BE REWORKED
-        with open((os.path.expanduser("~") + "/.config/Palindrome/auth.json"), "r") as f:
+        self.configPath = (os.path.expanduser("~") + "/.config/Palindrome")
+        # It opens the config file.
+        if not os.path.exists(self.configPath):
+            os.mkdir(self.configPath)
+
+        if not os.path.exists((self.configPath + "/auth.json")):
+            auth = {
+                "hostname": "",
+                "username": "",
+                "password": ""
+            }
+            jsonObj = json.dumps(auth, indent=4)
+            with open(self.configPath + "/auth.json", "w") as f:
+                f.write(jsonObj)
+
+
+        with open((self.configPath + "/auth.json"), "r") as f:
             info = json.load(f)
 
             # create the salt and token
@@ -32,6 +45,16 @@ class API():
         return ''.join((random.choice(string.ascii_letters + string.digits) for i in range(10)))
 
     def updatePar(self, host, username, password):
+        auth = {
+            "hostname": host,
+            "username": username,
+            "password": password
+        }
+
+        jsonObj = json.dumps(auth, indent=4)
+        with open(self.configPath + "/auth.json", "w") as f:
+            f.write(jsonObj)
+
         self.url = host + "/rest/"
         salt = self.getSalt()
         token = (hashlib.md5(str(password + salt).encode())).hexdigest()

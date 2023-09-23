@@ -52,7 +52,7 @@
                                 </child>
                                 <child>
                                     <object class="GtkLabel" id="error">
-                                        <property name="label">Password</property>
+                                        <property name="label"></property>
                                     </object>
                                 </child>
                                 <child>

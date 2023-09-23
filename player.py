@@ -1,9 +1,9 @@
 class Player():
     import mpv
     player = mpv.MPV(ytdl=True)
-    queue = []
-    queueSelector = 0
-    isPlaying = False
+    queue = []          # The list of the songs that are in the queue
+    queueSelector = 0   # The index of the song that is currently playing
+    isPlaying = False   # Indicates if the player is stopped (if the player is paused this will be still be True)
 
     def __init__(self):
         pass
@@ -28,7 +28,7 @@ class Player():
     def togglePause(self):
         self.player.pause = not self.player.pause
 
-    def setVolume(self, volume : int):
+    def setVolume(self, volume: int):
         self.player.volume = volume
 
     def isPaused(self):

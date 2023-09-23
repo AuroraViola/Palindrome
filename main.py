@@ -11,7 +11,9 @@ from gi.repository import Adw, Gtk, GLib, Gdk
 class Palindrome(Adw.Application):
     player = player.Player()
     api = subsonic.API()
+    # The main window as a builder
     mainWindow = Gtk.Builder.new_from_file("data/ui/mainWindow.xml")
+    # The progressbar is an annimation
     progressBarAnimation = Adw.TimedAnimation.new(mainWindow.get_object("progressBar"), 0, 1, 5000, Adw.PropertyAnimationTarget.new(mainWindow.get_object("progressBar"), "fraction"))
 
     def __init__(self):
@@ -20,12 +22,15 @@ class Palindrome(Adw.Application):
         self.progressBarAnimation.set_easing(0)
 
     def formatTextForSongInfo(self, string):
+        # This is used to short a string that is too long. It's used in updateSongInfo()
         if len(string) > 30:
             return string[:28] + "..."
 
         return string
 
     def updateSongInfo(self):
+        # This method is called everytime a new song is playing
+        # It updates the songName, artistName and albumName labels. It also updated the coverArt and the Favourite Button
         currentSong = self.player.getCurrentSong()
         self.mainWindow.get_object("songName").set_label(self.formatTextForSongInfo(currentSong["@title"]))
         self.mainWindow.get_object("artistName").set_label(self.formatTextForSongInfo(currentSong["@artist"]))
@@ -40,12 +45,16 @@ class Palindrome(Adw.Application):
             self.mainWindow.get_object("FavouriteBtn").props.active = False
 
     def updateNowPlaying(self):
+        # This method is called everytime self.player.queue is modified
+
+        # This empty the nowPlaying_list (NEED TO BE REWORKED)
         while True:
             try:
                 self.mainWindow.get_object("nowPlaying_list").remove(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(0))
             except:
                 break
 
+        # This recreates the nowPlaying_list based on self.player.queue (should somehow be reworked)
         for i in range(len(self.player.queue)):
             song = self.player.queue[i]
             thing = Adw.ActionRow().new()
@@ -67,7 +76,10 @@ class Palindrome(Adw.Application):
 
             self.mainWindow.get_object("nowPlaying_list").append(thing)
 
+
     def convertSecToMin(self, duration):
+        # This funcion convert seconds to minutes
+        # If you give "132" to this function it will returns "2:12"
         secs = int(duration)
         mins = 0
 
@@ -80,11 +92,14 @@ class Palindrome(Adw.Application):
         return str(mins) + sep + str(secs)
 
     def updateSelected(self):
+        # This method is called everytime a new song is playing
+        # It updates the selected song on nowPlaying_list
         self.mainWindow.get_object("nowPlaying_list").unselect_all()
         self.mainWindow.get_object("nowPlaying_list").select_row(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(self.player.queueSelector))
 
     def addPlaylistToQueue(self, button, playlistId):
-        songlist = self.api.getPlaylist(playlistId)
+        # Add songs from a playlist to the queue
+        songlist = self.api.getPlaylistSongs(playlistId)
         if isinstance(songlist, list):
             for song in songlist:
                 self.player.queue.append(song)
@@ -95,7 +110,8 @@ class Palindrome(Adw.Application):
         self.updateSelected()
 
     def addAlbumToQueue(self, button, album_id):
-        songlist = self.api.getAlbum(album_id)
+        # Add songs from an album to the queue
+        songlist = self.api.getAlbumSongs(album_id)
         if isinstance(songlist, list):
             for song in songlist:
                 self.player.queue.append(song)
@@ -106,6 +122,7 @@ class Palindrome(Adw.Application):
         self.updateSelected()
 
     def playSelectedSong(self, button, index):
+        # This function is called everytime you play a selected song
         self.progressBarAnimation.reset()
         self.player.queueSelector = index
         self.mainWindow.get_object("playBtn").props.icon_name = "media-playback-pause-symbolic"
@@ -117,6 +134,7 @@ class Palindrome(Adw.Application):
         self.updateSongInfo()
 
     def getPlayUrl(self):
+        # Get the url of the current song for playing it with mpv
         par2 = self.api.par.copy()
         par2["id"] = self.player.getCurrentSong()["@id"]
         return self.api.url + "stream?" + urllib.parse.urlencode(par2)
@@ -209,6 +227,7 @@ class Palindrome(Adw.Application):
 
 
     def emptyQueueBtnPressed(self, button):
+        # This function empty the queue
         self.player.queue = []
         self.player.queueSelector = 0
         while True:
@@ -218,11 +237,11 @@ class Palindrome(Adw.Application):
                 break
 
     def setVolume(self, slider):
+        # This function set volume using a sqrt scale
         self.player.setVolume(int((slider.get_value()**0.5)*100))
 
     def do_activate(self):
-        window = Adw.ApplicationWindow(application=self, title="Palindrome")
-
+        # This create the Artist list
         for artist in self.api.getArtists():
             thing = Adw.ActionRow().new()
             thing.props.title = str(artist["@name"]).replace("&", "&amp;")
@@ -233,11 +252,13 @@ class Palindrome(Adw.Application):
 
             self.mainWindow.get_object("artists_list").append(thing)
 
+        # This create the Album list
         for album in self.api.getAlbumsList():
             thing = Adw.ActionRow().new()
             thing.props.title = str(album["@title"]).replace("&", "&amp;")
             thing.props.subtitle = str(album["@artist"]).replace("&", "&amp;")
 
+            # This add a button at the end of the ActionRow
             addQueueBtn = Gtk.Button().new()
             addQueueBtn.props.icon_name = "list-add-symbolic"
             addQueueBtn.connect("clicked", self.addAlbumToQueue, album["@id"])
@@ -247,6 +268,7 @@ class Palindrome(Adw.Application):
 
             self.mainWindow.get_object("albums_list").append(thing)
 
+        # This create the playlist list
         for playlist in self.api.getPlaylists():
             thing = Adw.ActionRow().new()
             thing.props.title = str(playlist["@name"]).replace("&", "&amp;")
@@ -255,6 +277,7 @@ class Palindrome(Adw.Application):
             else:
                 thing.props.subtitle = str(playlist["@songCount"]) + " Song"
 
+            # This add a button at the end of the ActionRow
             addQueueBtn = Gtk.Button().new()
             addQueueBtn.props.icon_name = "list-add-symbolic"
             addQueueBtn.connect("clicked", self.addPlaylistToQueue, playlist["@id"])
@@ -264,6 +287,7 @@ class Palindrome(Adw.Application):
 
             self.mainWindow.get_object("playlists_list").append(thing)
 
+        # Assign the function to buttons and similar thing
         self.progressBarAnimation.connect("done", self.finishedProgressBar)
 
         self.mainWindow.get_object("playBtn").connect("clicked", self.playBtnPressed)
@@ -276,7 +300,10 @@ class Palindrome(Adw.Application):
 
         self.mainWindow.get_object("volumeChanger").connect("value-changed", self.setVolume)
 
+        # Creates the window itself
         window = self.mainWindow.get_object("window")
+        window.set_title("Palindrome")
+        window.set_application(self)
 
         window.present()
 

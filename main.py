@@ -44,6 +44,9 @@ class Palindrome(Adw.Application):
         else:
             self.mainWindow.get_object("FavouriteBtn").props.active = False
 
+        self.mainWindow.get_object("nowPlaying_list").unselect_all()
+        self.mainWindow.get_object("nowPlaying_list").select_row(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(self.player.queueSelector))
+
     def updateNowPlaying(self):
         # This method is called everytime self.player.queue is modified
 
@@ -91,12 +94,6 @@ class Palindrome(Adw.Application):
 
         return str(mins) + sep + str(secs)
 
-    def updateSelected(self):
-        # This method is called everytime a new song is playing
-        # It updates the selected song on nowPlaying_list
-        self.mainWindow.get_object("nowPlaying_list").unselect_all()
-        self.mainWindow.get_object("nowPlaying_list").select_row(self.mainWindow.get_object("nowPlaying_list").get_row_at_index(self.player.queueSelector))
-
     def addPlaylistToQueue(self, button, playlistId):
         # Add songs from a playlist to the queue
         songlist = self.api.getPlaylistSongs(playlistId)
@@ -107,7 +104,6 @@ class Palindrome(Adw.Application):
             self.player.queue.append(songlist)
 
         self.updateNowPlaying()
-        self.updateSelected()
 
     def addAlbumToQueue(self, button, album_id):
         # Add songs from an album to the queue
@@ -119,7 +115,6 @@ class Palindrome(Adw.Application):
             self.player.queue.append(songlist)
 
         self.updateNowPlaying()
-        self.updateSelected()
 
     def playSelectedSong(self, button, index):
         # This function is called everytime you play a selected song
@@ -130,7 +125,6 @@ class Palindrome(Adw.Application):
         self.player.play(self.getPlayUrl())
         self.progressBarAnimation.play()
         self.player.unpause()
-        self.updateSelected()
         self.updateSongInfo()
 
     def getPlayUrl(self):
@@ -147,7 +141,6 @@ class Palindrome(Adw.Application):
                 self.player.play(self.getPlayUrl())
                 self.progressBarAnimation.play()
                 self.player.unpause()
-                self.updateSelected()
                 self.updateSongInfo()
             else:
                 if button.props.icon_name == "media-playback-start-symbolic":
@@ -181,7 +174,6 @@ class Palindrome(Adw.Application):
             if playBtn.props.icon_name == "media-playback-start-symbolic":
                 playBtn.props.icon_name = "media-playback-pause-symbolic"
             self.player.play(self.getPlayUrl())
-            self.updateSelected()
             self.updateSongInfo()
 
     def nextBtnPressed(self, button):
@@ -195,7 +187,6 @@ class Palindrome(Adw.Application):
             if playBtn.props.icon_name == "media-playback-start-symbolic":
                 playBtn.props.icon_name = "media-playback-pause-symbolic"
             self.player.play(self.getPlayUrl())
-            self.updateSelected()
             self.updateSongInfo()
 
     def finishedProgressBar(self, bar):
@@ -207,7 +198,6 @@ class Palindrome(Adw.Application):
                 self.player.play(self.getPlayUrl())
                 bar.set_duration(int(self.player.getCurrentSong()["@duration"])*1000+1000)
                 bar.play()
-                self.updateSelected()
                 self.updateSongInfo()
             else:
                 self.player.play(self.getPlayUrl())

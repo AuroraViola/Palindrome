@@ -21,10 +21,10 @@ class Palindrome(Adw.Application):
         GLib.set_application_name("Palindrome")
         self.progressBarAnimation.set_easing(0)
 
-    def openAboutWindow(self):
+    def openAboutWindow(self, button):
         dialog = Adw.AboutWindow().new()
         dialog.props.transient_for = self.mainWindow.get_object("window")
-        dialog.props.application_icon = "application-x-executable"
+        dialog.props.application_icon = "org.auroraviola.palindrome"
         dialog.props.application_name = "Palindrome"
         dialog.props.developer_name = "Aurora Arcidiacono"
         dialog.props.version = "0.1.0"
@@ -368,6 +368,7 @@ class Palindrome(Adw.Application):
         self.mainWindow.get_object("volumeChanger").connect("value-changed", self.setVolume)
 
         self.mainWindow.get_object("loginBtn").connect("clicked", self.openLoginWindow)
+        self.mainWindow.get_object("aboutBtn").connect("clicked", self.openAboutWindow)
 
 
         # Creates the window itself

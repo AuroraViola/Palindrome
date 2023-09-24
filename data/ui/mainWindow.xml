@@ -18,7 +18,12 @@
             </property>
             <child type="start">
               <object class="GtkButton" id="loginBtn">
-                <property name="label">login</property>
+                <property name="label">Login</property>
+              </object>
+            </child>
+            <child type="start">
+              <object class="GtkButton" id="aboutBtn">
+                <property name="label">About</property>
               </object>
             </child>
             <child type="end">

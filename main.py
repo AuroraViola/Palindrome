@@ -4,6 +4,7 @@ import urllib.parse
 import subsonic
 import player
 
+#this is useless
 gi.require_version('Adw', '1')
 gi.require_version("Gtk", "4.0")
 from gi.repository import Adw, Gtk, GLib, Gdk

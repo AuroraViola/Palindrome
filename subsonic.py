@@ -18,8 +18,7 @@ class API():
             auth = {
                 "hostname": "",
                 "username": "",
-                "token": "",
-                "salt": ""
+                "password": ""
             }
             jsonObj = json.dumps(auth, indent=4)
             with open(self.configPath + "/auth.json", "w") as f:
@@ -29,12 +28,13 @@ class API():
         with open((self.configPath + "/auth.json"), "r") as f:
             info = json.load(f)
 
-            self.setParAndHost(info["hostname"], info["username"], info["token"], info["salt"])
+            self.setParAndHost(info["hostname"], info["username"], info["password"])
 
-    def setParAndHost(self, hostname, username, token, salt):
+    def setParAndHost(self, hostname, username, password):
         # sets the params
-        salt = self.base64Decode(salt)
-        token = self.base64Decode(token)
+        salt = ''.join((random.choice(string.ascii_letters + string.digits) for i in range(10)))
+        password = self.base64Decode(password)
+        token = (hashlib.md5(str(password + salt).encode())).hexdigest()
         self.url = hostname + "/rest/"
         self.par = {
             "u": username,
@@ -58,18 +58,15 @@ class API():
         oldPar = self.par.copy()
         oldurl = self.url
 
-        salt = ''.join((random.choice(string.ascii_letters + string.digits) for i in range(10)))
-        token = self.base64Encode((hashlib.md5(str(password + salt).encode())).hexdigest())
-        salt = self.base64Encode(salt)
-        self.setParAndHost(host, username, token, salt)
+        password = self.base64Encode(password)
+        self.setParAndHost(host, username, password)
 
         ping = self.ping()
         if ping == "ok":
             auth = {
                 "hostname": host,
                 "username": username,
-                "token": token,
-                "salt": salt
+                "password": password
             }
 
             jsonObj = json.dumps(auth, indent=4)

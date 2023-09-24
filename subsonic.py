@@ -4,6 +4,7 @@ import random
 import string
 import requests
 import xmltodict
+import base64
 import os
 
 class API():
@@ -27,37 +28,14 @@ class API():
         with open((self.configPath + "/auth.json"), "r") as f:
             info = json.load(f)
 
-            # create the salt and token
-            salt = self.getSalt()
-            token = (hashlib.md5(str(info["password"]+salt).encode())).hexdigest()
+            self.setParAndHost(info["hostname"], info["username"], info["password"])
 
-            self.url = info["hostname"] + "/rest/"
-            self.par = {
-                "u": info["username"],
-                "t": token,
-                "s": salt,
-                "v": "1.16.1",
-                "c": "Palindrome"
-            }
-
-    def getSalt(self):
-        # Returns a random string of 10 chars. This will be the salt
-        return ''.join((random.choice(string.ascii_letters + string.digits) for i in range(10)))
-
-    def updatePar(self, host, username, password):
-        auth = {
-            "hostname": host,
-            "username": username,
-            "password": password
-        }
-
-        jsonObj = json.dumps(auth, indent=4)
-        with open(self.configPath + "/auth.json", "w") as f:
-            f.write(jsonObj)
-
-        self.url = host + "/rest/"
-        salt = self.getSalt()
+    def setParAndHost(self, hostname, username, password):
+        # sets the params
+        salt = ''.join((random.choice(string.ascii_letters + string.digits) for i in range(10)))
+        password = self.base64Decode(password)
         token = (hashlib.md5(str(password + salt).encode())).hexdigest()
+        self.url = hostname + "/rest/"
         self.par = {
             "u": username,
             "t": token,
@@ -65,6 +43,41 @@ class API():
             "v": "1.16.1",
             "c": "Palindrome"
         }
+
+    def base64Decode(self, base64_message):
+        base64_bytes = base64_message.encode('ascii')
+        message_bytes = base64.b64decode(base64_bytes)
+        return message_bytes.decode('ascii')
+
+    def base64Encode(self, message):
+        message_bytes = message.encode('ascii')
+        base64_bytes = base64.b64encode(message_bytes)
+        return base64_bytes.decode('ascii')
+
+    def updatePar(self, host, username, password):
+        oldPar = self.par.copy()
+        oldurl = self.url
+
+        password = self.base64Encode(password)
+        self.setParAndHost(host, username, password)
+
+        ping = self.ping()
+        if ping == "ok":
+            auth = {
+                "hostname": host,
+                "username": username,
+                "password": password
+            }
+
+            jsonObj = json.dumps(auth, indent=4)
+            with open(self.configPath + "/auth.json", "w") as f:
+                f.write(jsonObj)
+        else:
+            self.par = oldPar.copy()
+            self.url = oldurl
+
+        return ping
+
 
     def ping(self):
         try:

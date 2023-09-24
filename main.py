@@ -13,7 +13,7 @@ class Palindrome(Adw.Application):
     api = subsonic.API()
     # The main window as a builder
     mainWindow = Gtk.Builder.new_from_file("data/ui/mainWindow.xml")
-    # The progressbar is an annimation
+    # The progressbar is an animation of the property "fraction" of the progressBar
     progressBarAnimation = Adw.TimedAnimation.new(mainWindow.get_object("progressBar"), 0, 1, 5000, Adw.PropertyAnimationTarget.new(mainWindow.get_object("progressBar"), "fraction"))
 
     def __init__(self):
@@ -36,14 +36,17 @@ class Palindrome(Adw.Application):
         dialog.props.artists = ["Aurora Arcidiacono https://github.com/AuroraViola"]
         dialog.present()
 
-    def loginBtnPressed(self, button, host, username, password, errorLabel):
-        self.api.updatePar(host.props.text, username.props.text, password.props.text)
-        errorLabel.props.label = self.api.ping()
-        if errorLabel.props.label == "ok":
+    def loginBtnPressed(self, button, host, username, password, errorLabel, window):
+        response = self.api.updatePar(host.props.text, username.props.text, password.props.text)
+        if response == "ok":
             self.createArtistsList()
             self.createAlbumList()
             self.createPlaylistsList()
             self.emptyQueueBtnPressed(button="None")
+            window.close()
+        else:
+            errorLabel.props.label = response
+
 
     def openLoginWindow(self, button):
         loginWindow = Gtk.Builder.new_from_file("data/ui/loginWindow.xml")
@@ -54,7 +57,7 @@ class Palindrome(Adw.Application):
         errorLabel = loginWindow.get_object("error")
         window.props.title = "Login"
         window.props.transient_for = self.mainWindow.get_object("window")
-        loginWindow.get_object("loginBtn").connect("clicked", self.loginBtnPressed, host, username, password, errorLabel)
+        loginWindow.get_object("loginBtn").connect("clicked", self.loginBtnPressed, host, username, password, errorLabel, window)
         window.present()
 
     def formatTextForSongInfo(self, string):

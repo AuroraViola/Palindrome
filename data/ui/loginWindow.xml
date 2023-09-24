@@ -1,15 +1,11 @@
 <interface>
     <requires lib="gtk" version="4.0"/>
-    <object class="AdwWindow" id="loginWindow">
-        <property name="width-request">500</property>
-        <property name="height-request">400</property>
-        <property name="content">
+    <object class="AdwMessageDialog" id="loginWindow">
+        <property name="heading">Welcome to Palindrome</property>
+        <property name="body">Please login with you Subsonic instance information</property>
+        <child>
             <object class="GtkBox">
                 <property name="orientation">1</property>
-                <child>
-                    <object class="AdwHeaderBar">
-                    </object>
-                </child>
                 <child>
                     <object class="AdwClamp">
                         <property name="margin-top">20</property>
@@ -21,6 +17,7 @@
                                 <property name="spacing">5</property>
                                 <child>
                                     <object class="GtkLabel">
+                                        <property name="halign">1</property>
                                         <property name="label">Hostname</property>
                                     </object>
                                 </child>
@@ -31,6 +28,7 @@
                                 </child>
                                 <child>
                                     <object class="GtkLabel">
+                                        <property name="halign">1</property>
                                         <property name="label">Username</property>
                                     </object>
                                 </child>
@@ -41,6 +39,7 @@
                                 </child>
                                 <child>
                                     <object class="GtkLabel">
+                                        <property name="halign">1</property>
                                         <property name="label">Password</property>
                                     </object>
                                 </child>
@@ -59,6 +58,7 @@
                                     <object class="GtkButton" id="loginBtn">
                                         <property name="margin-top">24</property>
                                         <property name="label">Login</property>
+                                        <property name="halign">2</property>
                                         <style>
                                             <class name="suggested-action"/>
                                         </style>
@@ -69,6 +69,6 @@
                     </object>
                 </child>
             </object>
-        </property>
+        </child>
     </object>
 </interface>

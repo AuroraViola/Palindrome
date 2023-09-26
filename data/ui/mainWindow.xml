@@ -184,6 +184,7 @@
           <object class="GtkBox">
             <property name="height-request">80</property>
             <property name="orientation">0</property>
+            <property name="homogeneous">1</property>
             <property name="margin-start">10</property>
             <property name="margin-end">10</property>
             <property name="margin-top">10</property>
@@ -210,18 +211,21 @@
                     <property name="margin-start">10</property>
                     <child>
                       <object class="GtkLabel" id="songName">
+                        <property name="ellipsize">3</property>
                         <property name="label">-</property>
                         <property name="halign">1</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkLabel" id="artistName">
+                        <property name="ellipsize">3</property>
                         <property name="label">-</property>
                         <property name="halign">1</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkLabel" id="albumName">
+                        <property name="ellipsize">3</property>
                         <property name="label">-</property>
                         <property name="halign">1</property>
                       </object>

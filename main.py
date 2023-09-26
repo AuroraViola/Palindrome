@@ -62,21 +62,14 @@ class Palindrome(Adw.Application):
         loginWindow.get_object("loginBtn").connect("clicked", self.loginBtnPressed, host, username, password, errorLabel, window)
         window.present()
 
-    def formatTextForSongInfo(self, string):
-        # This is used to short a string that is too long. It's used in updateSongInfo()
-        if len(string) > 30:
-            return string[:28] + "..."
-
-        return string
-
     def updateSongInfo(self):
         # This method is called everytime a new song is playing
 
         # It updates the songName, artistName and albumName labels. It also updated the coverArt and the Favourite Button
         currentSong = self.player.getCurrentSong()
-        self.mainWindow.get_object("songName").set_label(self.formatTextForSongInfo(currentSong["@title"]))
-        self.mainWindow.get_object("artistName").set_label(self.formatTextForSongInfo(currentSong["@artist"]))
-        self.mainWindow.get_object("albumName").set_label(self.formatTextForSongInfo(currentSong["@album"]))
+        self.mainWindow.get_object("songName").set_label(currentSong["@title"])
+        self.mainWindow.get_object("artistName").set_label(currentSong["@artist"])
+        self.mainWindow.get_object("albumName").set_label(currentSong["@album"])
 
         # It adds the image to the cache if it doesn't exist and then it sets the cover art
         imageFolderCachePath = (os.path.expanduser("~") + "/.cache/Palindrome/images")

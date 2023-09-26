@@ -271,8 +271,6 @@ class Palindrome(Adw.Application):
 
     def setVolume(self, slider):
         # This function set volume using a sqrt scale
-        newVolume = (slider.get_value()**2)*100
-        print(newVolume)
         self.player.setVolume(int((slider.get_value()**2)*100))
 
     def createArtistsList(self):

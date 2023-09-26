@@ -1,3 +1,4 @@
+import os
 import sys
 import gi
 import urllib.parse
@@ -9,6 +10,7 @@ gi.require_version("Gtk", "4.0")
 from gi.repository import Adw, Gtk, GLib, Gdk
 
 class Palindrome(Adw.Application):
+    #os.chdir("/home/aurora/PycharmProjects/Palindrome")
     player = player.Player()
     api = subsonic.API()
     # The main window as a builder
@@ -24,7 +26,7 @@ class Palindrome(Adw.Application):
     def openAboutWindow(self, button):
         dialog = Adw.AboutWindow().new()
         dialog.props.transient_for = self.mainWindow.get_object("window")
-        dialog.props.application_icon = "org.auroraviola.palindrome"
+        dialog.props.application_icon = "palindrome"
         dialog.props.application_name = "Palindrome"
         dialog.props.developer_name = "Aurora Arcidiacono"
         dialog.props.version = "0.1.0"
@@ -69,15 +71,23 @@ class Palindrome(Adw.Application):
 
     def updateSongInfo(self):
         # This method is called everytime a new song is playing
+
         # It updates the songName, artistName and albumName labels. It also updated the coverArt and the Favourite Button
         currentSong = self.player.getCurrentSong()
         self.mainWindow.get_object("songName").set_label(self.formatTextForSongInfo(currentSong["@title"]))
         self.mainWindow.get_object("artistName").set_label(self.formatTextForSongInfo(currentSong["@artist"]))
         self.mainWindow.get_object("albumName").set_label(self.formatTextForSongInfo(currentSong["@album"]))
 
-        image = Gdk.Texture.new_from_bytes(GLib.Bytes.new(self.api.getCoverArt(self.player.getCurrentSong()["@id"])))
-        self.mainWindow.get_object("coverArt").set_paintable(image)
+        # It adds the image to the cache if it doesn't exist and then it sets the cover art
+        imageFolderCachePath = (os.path.expanduser("~") + "/.cache/Palindrome/images")
+        os.makedirs(imageFolderCachePath, exist_ok=True)
+        imageCachePath = (imageFolderCachePath + "/" + self.player.getCurrentSong()["@id"])
+        if not os.path.exists(imageCachePath):
+            with open(imageCachePath, "wb") as f:
+                f.write(self.api.getCoverArt(songId=self.player.getCurrentSong()["@id"]))
+        self.mainWindow.get_object("coverArt").set_filename(imageCachePath)
 
+        # This update the favourite button
         if "@starred" in currentSong:
             self.mainWindow.get_object("FavouriteBtn").props.active = True
         else:
@@ -381,8 +391,6 @@ class Palindrome(Adw.Application):
         if self.api.ping() != "ok":
             self.openLoginWindow(button=None)
 
-
 app = Palindrome()
 exit_status = app.run(sys.argv)
 sys.exit(exit_status)
-
